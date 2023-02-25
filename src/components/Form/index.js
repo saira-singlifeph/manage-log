@@ -1,6 +1,6 @@
 import React from 'react';
-import { Form, Input, Button } from 'antd';
-
+import { Form, Input, Button, Select } from 'antd';
+import { PRIORITIES as levels } from '../../constant/constant';
 const { TextArea } = Input;
 
 const FormData = ({ 
@@ -55,8 +55,12 @@ const FormData = ({
     const formItem = attributeNames.map(({ name, key })=>{
        return(
             <Form.Item label={name} name={key}>
-                {name !== "Message" ? <Input required readOnly={isInputReadyOnly} /> :
-                    <TextArea required readOnly={isInputReadyOnly}/>
+                {   
+                    key === "priority" ? (
+                        <Select required disabled={isInputReadyOnly}>
+                            {levels.map((level) => <Select.Option id={level} value={level}>{level}</Select.Option>)}
+                        </Select>
+                    ) : key === "message" ? <TextArea required readOnly={isInputReadyOnly}/> : <Input required readOnly={isInputReadyOnly} />
                 }
             </Form.Item>
         )

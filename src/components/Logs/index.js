@@ -3,6 +3,7 @@ import moment from 'moment';
 // component
 import Log from '../Log';
 import CreateLog from '../Create Log';
+import FilterOptions from '../Filters';
 
 // services
 import { 
@@ -10,12 +11,26 @@ import {
     getLogById, 
     deleteLogById, 
     updateLogById,
-    createLog, 
+    createLog,
+    queryLogs
 } from '../../services/api';
 
-import { Table, Button, Modal, Space } from 'antd';
+import { 
+    Table, 
+    Button, 
+    Modal, 
+    Space,
+    Col, 
+    Row,
+} from 'antd';
+
+import { 
+    SOURCES as sources
+} from '../../constant/constant';
 
 const { confirm } = Modal;
+
+
 const Logs = () => {
 
     const [ logs, setLogs ] = useState([]);
@@ -34,7 +49,12 @@ const Logs = () => {
     const [ isCreating, setIsCreating ] = useState(false);
     const [ isReadyOnly, setIsReadyOnly ] = useState(true);
 
-
+    // Queries
+    const [ queryPriority, setQueryPriority ] = useState(null);
+    const [ querySources, setQuerySources ] = useState(null);
+    // const dateToday = moment().format("YYYY-MM-DD");
+    // const [ queryFromDate, setQueryFromDate ] = useState(dateToday);
+    // const [ queryToDate, setQueryToDate ] = useState(dateToday);
 
     const fetchLogs = async() => {
         setLoading(true);
@@ -43,6 +63,10 @@ const Logs = () => {
             setLogs(logs);
         }
         setLoading(false);
+        setQueryPriority(null);
+        setQuerySources(null);
+        // setQueryFromDate(null);
+        // setQueryToDate(null);
     };
 
     // TODO: EDIT FUNCTION NAME
@@ -68,7 +92,7 @@ const Logs = () => {
        if (success) {
         setLogDetails(log)
        }
-       setIsFetchingDetails(false)
+       setIsFetchingDetails(false);
     };
 
     const deleteLog = ({ log_name, id }) => {
@@ -104,7 +128,7 @@ const Logs = () => {
 
     const openCreateLogModal = () => {
         setIsCreateLog(!isCreateLog);
-        setIsReadyOnly(false);
+        setIsReadyOnly(!isReadyOnly);
     }
 
     const handleCreateLog = async(newLog) => {
@@ -118,6 +142,39 @@ const Logs = () => {
         }
         setIsCreating(false);
         // TODO: ADD NOTIFICATION IF ERROR
+    }
+
+
+    const handleQueries = async(queryData) => {
+        console.log('queryData', queryData)
+        const { 
+            level = queryPriority, 
+            // dates = [], 
+            source = null,
+        } = queryData;
+        const payload = { level };
+
+
+        if (!level) {
+            fetchLogs();
+        } else {
+            setQueryPriority(level);
+
+            if (sources) {
+                payload.source = source;
+                setQuerySources(source);
+            }
+
+    
+            setLoading(true);
+            const { result = [] } = await queryLogs(payload)
+            
+            setLogs(result);
+            setLoading(false);
+        }
+
+       
+        
     }
 
     const columns = [
@@ -144,20 +201,26 @@ const Logs = () => {
             dataIndex: 'created_at',
             sorter: (a, b) => a.created_at.localeCompare(b.created_at),
             sortDirections: ['descend', 'ascend'],
-            render: (created_at) => moment(created_at).format("MMM DD, YYYY hh:mm:ss")
+            render: (created_at) => moment(created_at).format("MM-DD-YYYY hh:mm:ss")
+        },
+        {
+            title: 'Date Updated',
+            dataIndex: 'updated_at',
+            sorter: (a, b) => a.created_at.localeCompare(b.created_at),
+            sortDirections: ['descend', 'ascend'],
+            render: (created_at) => moment(created_at).format("MM-DD-YYYY hh:mm:ss")
         },
         {
             title: "Action",
-            key: "id",
+            key: "action",
             render: (log) => (
                 <>
-                    <Button  id={log.id} type="primary" onClick={()=> fetchLogDetails(log.id)}>View</Button>
-                    <Button  id={log.id} type="text" onClick={()=> deleteLog(log)}>Delete</Button>
+                    <Button type="primary" onClick={()=> fetchLogDetails(log.id)}>View</Button>
+                    <Button type="text" onClick={()=> deleteLog(log)}>Delete</Button>
                 </>
             )
         }
     ]
-
 
     useEffect(() =>{
         fetchLogs();
@@ -165,20 +228,34 @@ const Logs = () => {
 
     return(
         <>
-        <Space
-            style={{
-            marginBottom: 16,
-            }}
-        >
-            <Button type="primary" onClick={openCreateLogModal}>Create Log</Button>
-            <Button type="primary" onClick={fetchLogs}>Reload Logs</Button>
-        </Space>
-        <Table 
-            columns={columns} 
-            dataSource={logs} 
-            hasData={logs.length} 
-            loading={loading} 
+        <Row>
+            <Col span={24}>
+            <Space
+                style={{
+                marginBottom: 16,
+                }}
+            >
+                <Button type="primary" onClick={openCreateLogModal}>Create Log</Button>
+                <Button type="primary" onClick={fetchLogs}>Reload Logs</Button>
+            </Space>
+            </Col>
+        </Row>
+        <Row>
+            <Col>
+                <FilterOptions queryPriority={queryPriority} handleQueries={handleQueries}/>
+            </Col>
+        </Row>
+        <Row>
+            <Col span={24}>
+            <Table 
+                columns={columns} 
+                dataSource={logs} 
+                hasData={logs.length} 
+                loading={loading}
+                rowKey={(logs) => logs.id}
         />
+            </Col>
+        </Row>
         <Log 
             logDetails={logDetails} 
             isOpen={viewDetails} 

@@ -104,3 +104,39 @@ export const createLog = async(data) => {
         };
     })
 }
+
+export const queryLogs = async({ 
+    level, 
+    toDate = null,
+    fromDate = null,
+    source = null,
+    queryAll = false, 
+}) => {
+    let queryURL = `${baseUrl}/logs/query?level=${level}`
+
+    if (queryAll) {
+        queryURL = `${queryURL}&source=${source}
+            &fromDate=${fromDate}&toDate=${toDate}&queryAll=${queryAll}`;
+    } else {
+        queryURL = source ? `${queryURL}&source=${source}` : (toDate && toDate) ?
+            `${queryURL}&fromDate=${fromDate}&toDate=${toDate}` : queryURL;
+    }
+   
+    return axios({
+        method: 'GET', 
+        url: queryURL,
+        headers,
+    })
+    .then((response => {
+        return { 
+            success: true,
+            result: response.data
+         }
+    }))
+    .catch((error) => {
+        return {
+            success: false,
+            error,
+        };
+    })
+} 
