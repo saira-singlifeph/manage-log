@@ -4,6 +4,7 @@ import moment from 'moment';
 import Log from '../Log';
 import CreateLog from '../Create Log';
 import FilterOptions from '../Filters';
+import SearchBar from '../Search Bar';
 
 // services
 import { 
@@ -24,9 +25,6 @@ import {
     Row,
 } from 'antd';
 
-import { 
-    SOURCES as sources
-} from '../../constant/constant';
 
 const { confirm } = Modal;
 
@@ -49,13 +47,6 @@ const Logs = () => {
     const [ isCreating, setIsCreating ] = useState(false);
     const [ isReadyOnly, setIsReadyOnly ] = useState(true);
 
-    // Queries
-    const [ queryPriority, setQueryPriority ] = useState(null);
-    const [ querySources, setQuerySources ] = useState(null);
-    // const dateToday = moment().format("YYYY-MM-DD");
-    // const [ queryFromDate, setQueryFromDate ] = useState(dateToday);
-    // const [ queryToDate, setQueryToDate ] = useState(dateToday);
-
     const fetchLogs = async() => {
         setLoading(true);
         const { success, logs } = await getLogs();
@@ -63,10 +54,6 @@ const Logs = () => {
             setLogs(logs);
         }
         setLoading(false);
-        setQueryPriority(null);
-        setQuerySources(null);
-        // setQueryFromDate(null);
-        // setQueryToDate(null);
     };
 
     // TODO: EDIT FUNCTION NAME
@@ -145,36 +132,32 @@ const Logs = () => {
     }
 
 
-    const handleQueries = async(queryData) => {
-        console.log('queryData', queryData)
-        const { 
-            level = queryPriority, 
-            // dates = [], 
-            source = null,
-        } = queryData;
-        const payload = { level };
+    const handleQueries = async({ level, source = null, range = [] }) => {
+        
+        console.log('range', range)
+        let queryPayload = {
+            level,
+            source,
+        };
 
+        if (range.length) {
+            const fromDate = range[0].format("YYYY-MM-DD");
+            const toDate = range[1].format("YYYY-MM-DD")
 
-        if (!level) {
-            fetchLogs();
-        } else {
-            setQueryPriority(level);
-
-            if (sources) {
-                payload.source = source;
-                setQuerySources(source);
+            queryPayload = {
+                ...queryPayload,
+                fromDate,
+                toDate
             }
-
-    
-            setLoading(true);
-            const { result = [] } = await queryLogs(payload)
-            
-            setLogs(result);
-            setLoading(false);
         }
 
-       
-        
+        console.log('queryPayload', queryPayload)
+
+         // add loading icon to the table to indicate the querying started
+         setLoading(true);
+         const { result = [] } = await queryLogs(queryPayload);
+         setLoading(false);
+         setLogs(result);       
     }
 
     const columns = [
@@ -242,7 +225,10 @@ const Logs = () => {
         </Row>
         <Row>
             <Col>
-                <FilterOptions queryPriority={queryPriority} handleQueries={handleQueries}/>
+                <FilterOptions handleQueries={handleQueries}/>
+            </Col>
+            <Col>
+                <SearchBar />
             </Col>
         </Row>
         <Row>
