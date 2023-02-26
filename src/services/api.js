@@ -153,4 +153,25 @@ export const queryLogs = async({
             error,
         };
     })
-} 
+}
+
+export const getCountOfPriorities = () => {
+    return axios({
+        method: 'GET', 
+        url: `${baseUrl}/logs/statistic/priorities`,
+        headers, 
+    })
+    .then((response) => {
+        return {
+            success: true,
+            prioritiesCount: response.data
+        }
+    })
+    .catch((error) => {
+        return {
+            success: false,
+            prioritiesCount: null,
+            error
+        };
+    })
+}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Form, Select, Space, DatePicker, Button } from 'antd';
+import Priorities from '../Priorities';
 import { 
     PRIORITIES as levels, 
     SOURCES as sources,
@@ -7,14 +8,17 @@ import {
 
 const { RangePicker } = DatePicker;
 
+
 const FilterOptions = (props) => {
 
+    const layout = props.layout || "inline";
     const selectStyle = { width: "120px" };
+
     return (
        <Space>
             <Form
                 onFinish={props.handleQueries}
-                layout="inline"
+                layout={layout}
                 initialValues={{
                     level: "",
                     source: "",
