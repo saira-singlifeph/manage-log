@@ -47,6 +47,8 @@ const Logs = () => {
     const [ isCreating, setIsCreating ] = useState(false);
     const [ isReadyOnly, setIsReadyOnly ] = useState(true);
 
+    const [ searchText, setSearchText ] = useState(null);
+
     const fetchLogs = async() => {
         setLoading(true);
         const { success, logs } = await getLogs();
@@ -133,8 +135,6 @@ const Logs = () => {
 
 
     const handleQueries = async({ level, source = null, range = [] }) => {
-        
-        console.log('range', range)
         let queryPayload = {
             level,
             source,
@@ -151,13 +151,23 @@ const Logs = () => {
             }
         }
 
-        console.log('queryPayload', queryPayload)
-
          // add loading icon to the table to indicate the querying started
          setLoading(true);
          const { result = [] } = await queryLogs(queryPayload);
          setLoading(false);
          setLogs(result);       
+    }
+
+    const handleSearchBar = async (logName) => {
+        if (logName) {
+            setLoading(true);
+            setSearchText(logName)
+            const { result = [] } = await queryLogs({ logName });
+            setLoading(false);
+            setLogs(result);
+        } else {
+            fetchLogs();
+        }
     }
 
     const columns = [
@@ -228,7 +238,7 @@ const Logs = () => {
                 <FilterOptions handleQueries={handleQueries}/>
             </Col>
             <Col>
-                <SearchBar />
+                <SearchBar searcText={searchText} handleSearchBar={handleSearchBar} />
             </Col>
         </Row>
         <Row>

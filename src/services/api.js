@@ -110,10 +110,18 @@ export const queryLogs = async({
     toDate = null,
     fromDate = null,
     source = null,
-    queryAll = false, 
+    logName = null
 }) => {
     let queryCount = 1;
-    let queryURL = `${baseUrl}/logs/query?level=${level}`;
+    let queryURL = `${baseUrl}/logs/query?`;
+
+    if (logName) {
+        queryURL = `${queryURL}&log_name=${logName}`;
+    }
+
+    if (level) {
+        queryURL = `${queryURL}&level=${level}`;
+    }
 
     if (source) {
         queryCount += 1;
@@ -123,10 +131,10 @@ export const queryLogs = async({
 
     if (fromDate && toDate) {
         queryCount += 1;
-        queryURL = `${queryURL}&toDate=${toDate}&fromDate=${fromDate}`;
+        queryURL = `${queryURL}&to_date=${toDate}&from_date=${fromDate}`;
     }
 
-    queryURL = queryCount === 3 ? `${queryURL}&queryAll=${true}` : queryURL;
+    queryURL = queryCount === 3 ? `${queryURL}&query_all=${true}` : queryURL;
   
     return axios({
         method: 'GET', 
