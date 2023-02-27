@@ -1,6 +1,5 @@
 import React from 'react';
 import { Form, Select, Space, DatePicker, Button } from 'antd';
-import Priorities from '../Priorities';
 import { 
     PRIORITIES as levels, 
     SOURCES as sources,

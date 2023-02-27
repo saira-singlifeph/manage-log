@@ -158,7 +158,7 @@ export const queryLogs = async({
 export const getCountOfPriorities = () => {
     return axios({
         method: 'GET', 
-        url: `${baseUrl}/logs/statistic/priorities`,
+        url: `${baseUrl}/logs/statistic/count`,
         headers, 
     })
     .then((response) => {
@@ -171,6 +171,32 @@ export const getCountOfPriorities = () => {
         return {
             success: false,
             prioritiesCount: null,
+            error
+        };
+    })
+}
+
+export const getStatisticData = ({ priority = null, source = null }) => {
+
+    let query = `/&priority_level=${priority}`
+    if (source) {
+        query = `/&source_type=${source}`
+    }
+    return axios({
+        method: 'GET', 
+        url: `${baseUrl}/logs/statistic/data?${query}`,
+        headers, 
+    })
+    .then((response) => {
+        return {
+            success: true,
+            data: response.data
+        }
+    })
+    .catch((error) => {
+        return {
+            success: false,
+            data: [],
             error
         };
     })

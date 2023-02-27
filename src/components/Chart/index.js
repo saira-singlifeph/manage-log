@@ -2,15 +2,15 @@ import React from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 
-const LogChat = () => {
-
+const LogChart = (props) => {
+  console.log('props')
     ChartJS.register(ArcElement, Tooltip, Legend);
     const data = {
-        labels: ['Red', 'Blue', 'Yellow', 'Green'],
+        labels: props.fetchedLevels,
         datasets: [
           {
             label: '# of Votes',
-            data: [12, 19, 3, 5, 2, 3],
+            data: props.statisticData,
             backgroundColor: [
               'rgba(255, 99, 132, 0.2)',
               'rgba(54, 162, 235, 0.2)',
@@ -31,4 +31,4 @@ const LogChat = () => {
     return <Doughnut data={data}/>
 }
 
-export default LogChat;
+export default LogChart;
