@@ -13,7 +13,7 @@ import {
         SOURCES as sources 
 } from '../../constant/constant';
 
-const StatisticLogs = () => {
+const Analytics = () => {
 
     const [ countOfPriorities, setCountOfPriorities ] = useState({
         urgent: 0,
@@ -26,19 +26,19 @@ const StatisticLogs = () => {
     const [ statisticData, setStatisticData ] = useState([]);
 
     const getPriorities = async () => {
-        const { success, prioritiesCount = null } = await getCountOfPriorities();
+        const { success, prioritiesCount = [] } = await getCountOfPriorities();
         if (success && prioritiesCount) {
             setCountOfPriorities(prioritiesCount)
         }
     };
 
 
-    const getChartData = async (selected = { priority: 'high' }) => {
+    const getChartData = async (selected = { priority: 'low' }) => {
         const { data = [] } = await getStatisticData(selected);
         if (data.length > 0) {
-            const levels = data.map(({ level }) => level);
+            const type = data.map(({ type }) => type);
             const logCounts = data.map(({ logs }) => logs);
-            setFetchedLevels(levels);
+            setFetchedLevels(type);
             setStatisticData(logCounts);
         }
         
@@ -46,23 +46,24 @@ const StatisticLogs = () => {
 
     useEffect(() => {
         getPriorities();
+        getChartData();
     },[]);
 
     const countersData = [
         {
-            title: "Urgent",
+            title: 'Urgent',
             value: countOfPriorities.urgent
         },
         {
-            title: "High",
+            title: 'High',
             value: countOfPriorities.high
         },
         {
-            title: "Medium",
+            title: 'Medium',
             value: countOfPriorities.medium
         },
         {
-            title: "Low",
+            title: 'Low',
             value: countOfPriorities.low
         }
     ].map(({ title, value }) => {
@@ -78,15 +79,15 @@ const StatisticLogs = () => {
     const populateCharForm = [
         {
             options: priorities,
-            label: "Populate the chart by Priority Level:",
-            type: "priority",
-            btnLabel: "Apply Priority"
+            label: 'Populate the chart by Priority Level:',
+            type: 'priority',
+            btnLabel: 'Apply Priority'
         },
         {
             options: sources,
-            label: "Populate the chart by Source:",
-            type: "source",
-            btnLabel: "Apply Source"
+            label: 'Populate the chart by Source:',
+            type: 'source',
+            btnLabel: 'Apply Source'
         }
     ].map((option) => {
         return <SelectedType {...option} onFinish={getChartData}/>
@@ -114,4 +115,4 @@ const StatisticLogs = () => {
     )
 }
 
-export default StatisticLogs;
+export default Analytics;

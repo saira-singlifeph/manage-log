@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Route, 
   Routes, 
@@ -10,7 +10,7 @@ import { DatabaseFilled } from '@ant-design/icons';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
 // Components
 import Logs from '../components/Logs'
-import StatisticLogs from '../components/Statistic';
+import Analytics from '../components/Analytics';
 // CSS
 import './style.css';
 
@@ -20,7 +20,7 @@ const { Header, Content, Footer, Sider } = Layout;
 const items2 = [
   {
     icon: DatabaseFilled,
-    subs: ["Logs", "Statistic"]
+    subs: ['Logs', 'Analytics']
   },
 ].map(({ icon, subs }) => {
   return {
@@ -42,8 +42,8 @@ const navigations = [
     path: '/logs',
   },
   {
-    label: 'Statistic', 
-    path: '/statistic',
+    label: 'Analytics', 
+    path: '/analytics',
   }
 ];
 
@@ -55,18 +55,21 @@ const Dashboard = () => {
   } = theme.useToken();
   const navigate = useNavigate(); 
 
+  const [ currentPath, setCurrentPath ] = useState('Logs');
+
   const HandleMenuClick = ({ key }) => {
-    const { path } = navigations.find(item => item.label === key) || {};
+    const { path, label } = navigations.find(item => item.label === key) || {};
     if (path) {
+      setCurrentPath(label);
       navigate(path);
     }
   };
   
   return (
     <Layout>
-      <Header className="header">
-        <div className="logo" />
-        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['Logs']} items={[{ key: 1, label: "Logs" }]} />
+      <Header className='header'>
+        <div className='logo' />
+        <Menu theme='dark' mode='horizontal' defaultSelectedKeys={['Logs']} items={[{ key: 1, label: 'Logs' }]} />
       </Header>
       <Content
         style={{
@@ -79,7 +82,7 @@ const Dashboard = () => {
           }}
         >
           <Breadcrumb.Item>Dashboard</Breadcrumb.Item>
-          <Breadcrumb.Item>Logs</Breadcrumb.Item>
+          <Breadcrumb.Item>{currentPath}</Breadcrumb.Item>
         </Breadcrumb>
         <Layout
           style={{
@@ -94,7 +97,7 @@ const Dashboard = () => {
             width={200}
           >
             <Menu
-              mode="inline"
+              mode='inline'
               defaultSelectedKeys={['Logs']}
               defaultOpenKeys={['Logs']}
               style={{
@@ -113,8 +116,8 @@ const Dashboard = () => {
           >
                 <Routes>
                   <Route path='/logs' element={<Logs />} />
-                  <Route path='/statistic' element={<StatisticLogs />} />
-                  <Route path="*" element={<Navigate to="/logs" replace />}/>
+                  <Route path='/analytics' element={<Analytics />} />
+                  <Route path='*' element={<Navigate to='/logs' replace />}/>
                 </Routes>
           </Content>
         </Layout>
@@ -124,7 +127,7 @@ const Dashboard = () => {
           textAlign: 'center',
         }}
       >
-        Manage Logs Web App - Saira Bunny Espino 
+          Manage App - SCE
       </Footer>
     </Layout>
   );

@@ -6,15 +6,15 @@ import FormData from '../Form/index';
 const Log = (props) => {
 
     const form = (logDetails) => {
-        return logDetails ? <FormData logDetails={logDetails} {...props}/> : ""; 
+        return logDetails ? <FormData logDetails={logDetails} {...props}/> : ''; 
     };
 
     const content = props.loading && props.logDetail === null ? <Skeleton active/> : form(props.logDetails);
 
     return (
         <Drawer
-            title="Log Details"
-            placement="right"
+            title='Log Details'
+            placement='right'
             closable={false}
             onClose={props.onClose}
             open={props.isOpen}

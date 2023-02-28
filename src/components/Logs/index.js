@@ -24,30 +24,48 @@ import {
     Col, 
     Row,
 } from 'antd';
+import { FileExcelFilled } from '@ant-design/icons';
 
+import { CSVLink } from 'react-csv';
+import { CSV_HEADERS, DATE_FORM, DIRECTIONS } from '../../constant/constant';
 
 const { confirm } = Modal;
-
+ 
 
 const Logs = () => {
 
     const [ logs, setLogs ] = useState([]);
+
+    const [ csvLogs, setCSVlogs ] = useState([]);
     const [ loading,  setLoading] = useState(false);
 
     const [ isFetchingDetails, setIsFetchingDetails ] = useState(false);
     const [ logDetails, setLogDetails ] = useState(null);
     const [ viewDetails, setViewDetails] = useState(false);
 
-    const [ isEdit, setIsEdit] = useState(false);
+    const [ isEditLogDetails, setIsEditLogDetails ] = useState(false);
     const [ isUpdating, setIsUpdating] = useState(false);
     
-    // open create log modal
-    // TO DO: Rename
-    const [ isCreateLog, setIsCreateLog ] = useState(false);
+    const [ isCreateFormOpen, setIsCreateFormOpen ] = useState(false);
     const [ isCreating, setIsCreating ] = useState(false);
-    const [ isReadyOnly, setIsReadyOnly ] = useState(true);
+    const [ isInputReadyOnly, setIsInputReadyOnly ] = useState(true);
 
     const [ searchText, setSearchText ] = useState(null);
+
+    const downloadLogs = () => {
+        const data = logs.map((log) => {
+            return {
+                'log_name': log.log_name, 
+                'message': log.message, 
+                'priority': log.priority,
+                'source': log.source,
+                'created_at': log.created_at,
+                'updated_at': log.updated_at
+            } 
+        });
+        setCSVlogs(data)
+        return null;
+    };
 
     const fetchLogs = async() => {
         setLoading(true);
@@ -58,18 +76,16 @@ const Logs = () => {
         setLoading(false);
     };
 
-    // TODO: EDIT FUNCTION NAME
-    const onClose = () => {
+    const closeEditDetailsForm = () => {
         setViewDetails(false);
         setLogDetails(null);
-        setIsEdit(false);
-        setIsReadyOnly(true);
+        setIsEditLogDetails(false);
+        setIsInputReadyOnly(true);
     };
 
-    // TODO: EDIT FUNCTION NAME
-    const onEdit = () => {
-        setIsEdit(!isEdit);
-        setIsReadyOnly(!isReadyOnly)
+    const openEditDetailsForm = () => {
+        setIsEditLogDetails(!isEditLogDetails);
+        setIsInputReadyOnly(!isInputReadyOnly);
     }
 
     const fetchLogDetails = async(id) => {
@@ -79,7 +95,7 @@ const Logs = () => {
             success, log
         } = await getLogById(id);
        if (success) {
-        setLogDetails(log)
+        setLogDetails(log);
        }
        setIsFetchingDetails(false);
     };
@@ -91,33 +107,27 @@ const Logs = () => {
             const isDelete = await deleteLogById(id);
             fetchLogs();
             return isDelete;
-          },
-          onCancel() {
-            // DO NOTHING
-          },
+          }
         });
     };
     
     const handleLogUpdate = async(details) => {
         // Indicate the updating of data
         setIsUpdating(true);
-        const isUpdated = await updateLogById(details);
+        await updateLogById(details);
 
         // reset
         setIsUpdating(false);
-        setIsEdit(false);
-        setIsReadyOnly(true)
+        setIsEditLogDetails(false);
+        setIsInputReadyOnly(true)
 
-        // re-fetch logs to get the update list
-        fetchLogs();
-
-         // TODO: ADD NOTIFICATION
-        return isUpdated.success;
+         // re-fetch logs to get the update list
+         fetchLogs();
     };
 
     const openCreateLogModal = () => {
-        setIsCreateLog(!isCreateLog);
-        setIsReadyOnly(!isReadyOnly);
+        setIsCreateFormOpen(!isCreateFormOpen);
+        setIsInputReadyOnly(!isInputReadyOnly);
     }
 
     const handleCreateLog = async(newLog) => {
@@ -126,11 +136,10 @@ const Logs = () => {
         const { success } = await createLog(newLog);
         if (success) {
             fetchLogs();
-            setIsCreateLog(false);
-            setIsReadyOnly(true);
+            setIsCreateFormOpen(false);
+            setIsInputReadyOnly(true);
         }
         setIsCreating(false);
-        // TODO: ADD NOTIFICATION IF ERROR
     }
 
 
@@ -140,9 +149,10 @@ const Logs = () => {
             source,
         };
 
-        if (range.length) {
-            const fromDate = range[0].format("YYYY-MM-DD");
-            const toDate = range[1].format("YYYY-MM-DD")
+        if (range && range.length > 0) {
+            const format = 'YYYY-MM-DD';
+            const fromDate = range[0].format(format);
+            const toDate = range[1].format(format);
 
             queryPayload = {
                 ...queryPayload,
@@ -155,7 +165,7 @@ const Logs = () => {
          setLoading(true);
          const { result = [] } = await queryLogs(queryPayload);
          setLoading(false);
-         setLogs(result);       
+         setLogs(result);
     }
 
     const handleSearchBar = async (logName) => {
@@ -165,9 +175,10 @@ const Logs = () => {
             const { result = [] } = await queryLogs({ logName });
             setLoading(false);
             setLogs(result);
-        } else {
-            fetchLogs();
+            return null;
         }
+        fetchLogs();
+        return null;
     }
 
     const columns = [
@@ -181,35 +192,36 @@ const Logs = () => {
             dataIndex: 'priority',
             key: 'priority',
             sorter: (a, b) => a.priority.localeCompare(b.priority),
-            sortDirections: ['descend', 'ascend'],
+            sortDirections: DIRECTIONS,
         },
         {
             title: 'Source',
             dataIndex: 'source',
             sorter: (a, b) => a.source.localeCompare(b.source),
-            sortDirections: ['descend', 'ascend'],
+            sortDirections: DIRECTIONS,
         },
         {
             title: 'Date Created',
             dataIndex: 'created_at',
+            key: 'created_at',
             sorter: (a, b) => a.created_at.localeCompare(b.created_at),
-            sortDirections: ['descend', 'ascend'],
-            render: (created_at) => moment(created_at).format("MM-DD-YYYY hh:mm:ss")
+            sortDirections: DIRECTIONS,
+            render: (created_at) => moment(created_at).format(DATE_FORM)
         },
         {
             title: 'Date Updated',
             dataIndex: 'updated_at',
             sorter: (a, b) => a.created_at.localeCompare(b.created_at),
-            sortDirections: ['descend', 'ascend'],
-            render: (created_at) => moment(created_at).format("MM-DD-YYYY hh:mm:ss")
+            sortDirections: DIRECTIONS,
+            render: (created_at) => moment(created_at).format(DATE_FORM)
         },
         {
-            title: "Action",
-            key: "action",
+            title: 'Action',
+            key: 'action',
             render: (log) => (
                 <>
-                    <Button type="primary" onClick={()=> fetchLogDetails(log.id)}>View</Button>
-                    <Button type="text" onClick={()=> deleteLog(log)}>Delete</Button>
+                    <Button type='primary' onClick={()=> fetchLogDetails(log.id)}>View</Button>
+                    <Button type='text' onClick={()=> deleteLog(log)}>Delete</Button>
                 </>
             )
         }
@@ -228,8 +240,16 @@ const Logs = () => {
                 marginBottom: 16,
                 }}
             >
-                <Button type="primary" onClick={openCreateLogModal}>Create Log</Button>
-                <Button type="primary" onClick={fetchLogs}>Reload Logs</Button>
+                <Button type='primary' onClick={openCreateLogModal}>Create Log</Button>
+                <Button type='primary' onClick={fetchLogs}>Reload Logs</Button>
+                <CSVLink
+                        data={csvLogs} 
+                        headers={CSV_HEADERS}
+                        onClick={downloadLogs}
+                        filename={`logs-${moment().format('YYYYMMDDHHMMSS')}.csv`}
+                    >
+                    <Button><FileExcelFilled />Download</Button>
+                </CSVLink>
             </Space>
             </Col>
         </Row>
@@ -256,18 +276,18 @@ const Logs = () => {
             logDetails={logDetails} 
             isOpen={viewDetails} 
             loading={isFetchingDetails} 
-            onClose={onClose}
-            isEdit={isEdit}
-            onEdit={onEdit}
+            onClose={closeEditDetailsForm}
+            isEdit={isEditLogDetails}
+            onEdit={openEditDetailsForm}
             handleLogUpdate={handleLogUpdate}
             isUpdating={isUpdating}
-            isInputReadyOnly={isReadyOnly}
+            isInputReadyOnly={isInputReadyOnly}
         />
         <CreateLog 
-            isCreateLog={isCreateLog} 
+            isCreateLog={isCreateFormOpen} 
             handleCreateLog={handleCreateLog}
             openCreateLogModal={openCreateLogModal}
-            isInputReadyOnly={isReadyOnly}
+            isInputReadyOnly={isInputReadyOnly}
             isCreating={isCreating}
         />
         </>

@@ -1,6 +1,9 @@
 import React from 'react';
 import { Form, Input, Button, Select } from 'antd';
-import { PRIORITIES as levels } from '../../constant/constant';
+import { 
+    PRIORITIES as levels,
+    SOURCES as sources
+} from '../../constant/constant';
 const { TextArea } = Input;
 
 const FormData = ({ 
@@ -16,31 +19,11 @@ const FormData = ({
 }) => {
 
     let initialValues = {
-        log_name: "",
-        message: "",
-        priority: "",
-        source: ""
+        log_name: '',
+        message: '',
+        priority: '',
+        source: ''
     }
-
-    const attributeNames = 
-    [
-        {
-            name: "Log Name",
-            key: "log_name",
-        },
-        {
-            name: "Message",
-            key: "message",
-        },
-        {
-            name: "Priority",
-            key: "priority",
-        },
-        {
-            name: "Source",
-            key: "source",
-        }
-    ];
 
     const onFinishEdit = async(values) => {
         await handleLogUpdate(values)
@@ -52,21 +35,44 @@ const FormData = ({
 
     const onFinish = isEdit ? onFinishEdit : onFinishCreate;
 
-    const formItem = attributeNames.map(({ name, key })=>{
+    const formItem = [
+        {
+            name: 'Log Name',
+            key: 'log_name',
+            rules: [{ required: true, message: 'Please add a Log name'}]
+        },
+        {
+            name: 'Message',
+            key: 'message',
+            rules: [{ required: true, message: 'Please add a message'}]
+        },
+        {
+            name: 'Priority',
+            key: 'priority',
+            rules: [{ required: true, message: 'Please select priority level'}],
+            keys: levels
+        },
+        {
+            name: 'Source',
+            key: 'source',
+            rules: [{ required: true, message: 'Please select source type'}],
+            keys: sources
+        }
+    ].map(({ name, key, rules, keys })=>{
        return(
-            <Form.Item label={name} name={key}>
+            <Form.Item label={name} name={key} rules={rules}>
                 {   
-                    key === "priority" ? (
+                    ['source', 'priority'].includes(key) ? (
                         <Select required disabled={isInputReadyOnly}>
-                            {levels.map((level) => <Select.Option id={level} value={level}>{level}</Select.Option>)}
+                            {keys.map((key) => <Select.Option id={key} key={key} value={key}>{key}</Select.Option>)}
                         </Select>
-                    ) : key === "message" ? <TextArea required readOnly={isInputReadyOnly}/> : <Input required readOnly={isInputReadyOnly} />
+                    ) : key === 'message' ? <TextArea key={key} readOnly={isInputReadyOnly}/> : <Input key={key} readOnly={isInputReadyOnly} />
                 }
             </Form.Item>
         )
     });
 
-   
+
     if (logDetails) {
         initialValues = {
             id: logDetails.id,
@@ -77,7 +83,6 @@ const FormData = ({
         }
     }
     
-
     const handleButtons = (isForEdit = false, withLogDetails = null) => {
         if (isForEdit && withLogDetails) {
           return (
@@ -121,12 +126,11 @@ const FormData = ({
        )
     }
 
-
     return (
         <Form
-        onFinish={onFinish}
-        initialValues={initialValues}
-        layout="vertical"
+            onFinish={onFinish}
+            initialValues={initialValues}
+            layout='vertical'
         >
             {formItem}
             {handleButtons(isEdit, logDetails)}     

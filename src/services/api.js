@@ -161,10 +161,19 @@ export const getCountOfPriorities = () => {
         url: `${baseUrl}/logs/statistic/count`,
         headers, 
     })
-    .then((response) => {
+    .then(({ data }) => {
+        const prioritiesList = {
+            urgent: 0,
+            high: 0,
+            medium: 0,
+            low: 0
+        };
+
+        // eslint-disable-next-line array-callback-return
+        data.map(({ level, count }) => { prioritiesList[level] = count})
         return {
             success: true,
-            prioritiesCount: response.data
+            prioritiesCount: prioritiesList
         }
     })
     .catch((error) => {

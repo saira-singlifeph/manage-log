@@ -7,7 +7,7 @@ const SearchBar = (props) => {
     return (
         <Space>
             <Search 
-                placeholder="Search log by name" 
+                placeholder='Search log by name' 
                 value={props.searchText}
                 onSearch={props.handleSearchBar}
                 style={{ width: 200 }} 

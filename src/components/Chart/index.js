@@ -3,13 +3,12 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 
 const LogChart = (props) => {
-  console.log('props')
     ChartJS.register(ArcElement, Tooltip, Legend);
     const data = {
         labels: props.fetchedLevels,
         datasets: [
           {
-            label: '# of Votes',
+            label: '# of Logs filed',
             data: props.statisticData,
             backgroundColor: [
               'rgba(255, 99, 132, 0.2)',

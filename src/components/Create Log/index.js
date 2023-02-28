@@ -5,11 +5,12 @@ import Form from '../Form';
 const CreateLog = (props) => {
     return (
         <Modal
-        title="New Log"
+        title='New Log'
         centered
         open={props.isCreateLog}
         footer={null}
         destroyOnClose={true}
+        closable={false}
       >
         <Form 
             createToggle={props.openCreateLogModal} 
