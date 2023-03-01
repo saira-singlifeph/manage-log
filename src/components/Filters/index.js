@@ -9,7 +9,7 @@ const { RangePicker } = DatePicker;
 
 
 const FilterOptions = (props) => {
-    const selectStyle = { width: "120px" };
+    const selectStyle = { width: '120px' };
     return (
        <Space>
             <Form
@@ -21,15 +21,13 @@ const FilterOptions = (props) => {
                     range: ''
                 }}
             >
-                <Form.Item label='Priority Level' name='level' required>
-                    <Select style={selectStyle}>
-                        <Select.Option id='level'>All priorities</Select.Option>
+                <Form.Item label='Priority Level' name='level' required placeholder='Select Priority'>
+                    <Select style={selectStyle} name='level'>
                         {levels.map((level) => <Select.Option key={level}>{level}</Select.Option>)}
                     </Select>  
                 </Form.Item>
-                <Form.Item label='Source' name='source'>
-                    <Select style={selectStyle}>
-                        <Select.Option id='source'>All sources</Select.Option>
+                <Form.Item label='Source' name='source' placeholder='Select Source'>
+                    <Select style={selectStyle} name='source'>
                         {sources.map((source) => <Select.Option key={source}>{source}</Select.Option>)}
                     </Select> 
                 </Form.Item>
